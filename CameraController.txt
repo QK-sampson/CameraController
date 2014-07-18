@@ -1,0 +1,13 @@
+What I want my Camera script to do:
+
+1. Control my DSLR though GPhoto2 commands.
+
+2. Take a timelapse photo series.
+
+3. Trigger the camera to take a picture using the Raspberry Pi motion sensor.
+
+4. Use error handling for any cases where the camera does not take a store the image for any reason.
+
+5. Have built-in tests to verify each of these functions. (According to TDD the code writing should start with the tests.)
+ 
+
