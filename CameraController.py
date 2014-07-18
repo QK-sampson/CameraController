@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 """
 CameraController script by Mikel
+
+07/18/2014
+Initial writing of script. I successfully called GPhoto2 from Python
+to confirm that my (specific) camera is connected. I am thinking though
+how a test harness would be written for the checkCamera function, and
+I need to doublecheck what exceptions that the subprocess call might throw
+and add exception handling. 
 """
 
 import subprocess
@@ -20,8 +27,7 @@ def checkCamera():
     cameraCheck = subprocess.check_output(['sudo','gphoto2','--auto-detect'])
 #but...what if the return of 0 only means the call completed correctly
 #not that the camera is actually available? 
-    
-    print cameraCheck
+
     if cameraCheck.find('Nikon DSC D5100') >= 0: #not found results in -1
         cameraAvailable = True
         print "Nikon DSC D5100 found"
