@@ -46,6 +46,8 @@ def main():
                 keepGoing = False
             else:
                 print "You have not chosen a valid option. Try again."
+        else:
+            keepGoing = False
                 
 
 
