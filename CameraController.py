@@ -17,23 +17,22 @@ import subprocess
 cameraAvailable = False
 
 def main():
-    checkCamera()
-    print cameraAvailable
+    global cameraAvailable
+    cameraAvailable = checkCamera()
 
 
 def checkCamera():
-    global cameraAvailable #<-- don't forget the global variables!
-    
+    isCameraConnected = False
     cameraCheck = subprocess.check_output(['sudo','gphoto2','--auto-detect'])
-#but...what if the return of 0 only means the call completed correctly
-#not that the camera is actually available? 
 
-    if cameraCheck.find('Nikon DSC D5100') >= 0: #not found results in -1
-        cameraAvailable = True
+    if cameraCheck.find('Nikon DSC D5100') >= 0: #not found results in -1        
         print "Nikon DSC D5100 found"
-    else :
-        cameraAvailable = False #right now, checking only for my Nikon DSLR camera. More checks later maybe.
+        isCameraConnected = True
+    else:
+        print "Nikon DSC D5100 NOT found"
+        isCameraConnected = False
 
+    return isCameraConnected
 
 if __name__ == '__main__':
     main()
