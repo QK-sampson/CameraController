@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -- coding: utf-8 --
 """
 CameraController.py script by Mikel
 
@@ -18,7 +19,7 @@ Nikon DSC D5100 found
 ['sudo', 'gphoto2', '--capture-image', '-F', '2', '-I', '10']
 Time-lapse mode enabled (interval: 10s).
 Capturing frame #1/2...
-New file is in location /store_00010001/capt0000.jpg on the camera
+'New file is in location /store_00010001/capt0000.jpg on the camera
 Waiting for next capture slot 0 seconds...
 Capturing frame #2/2...
 New file is in location /store_00010001/capt0001.jpg on the camera
@@ -30,36 +31,44 @@ check and reset the process from within this script.
 #TODO: add configuration values as global variables
 
 
-import subprocess, sys
+import subprocess, sys, time
+import RPi.GPIO as io
+io.setmode(io.BCM)
 
+pir_pin=18
 
-def main():
+def main():    
     keepGoing = True
     while keepGoing:
-        if checkCamera():
-            choice = raw_input("What do you want to do? Select 1 for single photo, 2 for timelapse. ")
+        if checkCamera():            
+            choice = input("What do you want to do? Select 1 for single photo, 2 for timelapse, 3 for motion sensor trigger. ")
             if choice == "1":
                 takeOnePhoto()
                 keepGoing = False
             elif choice == "2":
                 takeTimeLapse()
                 keepGoing = False
+            elif choice == "3":
+                checkMotionSensor()               
+                keepGoing = False
             else:
-                print "You have not chosen a valid option. Try again."
+                print ("You have not chosen a valid option. Try again.")
         else:
             keepGoing = False
                 
 
 
 def checkCamera():
+    global cameraCheck
     isCameraConnected = False
     cameraCheck = subprocess.check_output(['sudo','gphoto2','--auto-detect'])
-
-    if cameraCheck.find('Nikon DSC D5100') >= 0: #not found results in -1        
-        print "Nikon DSC D5100 found"
+    print (cameraCheck)
+    #encoding the find string as UTF seems to have resolve the TypeError when I run with Python 3
+    if cameraCheck.find(('Nikon DSC D5100').encode("utf-8")) >= 0: #not found results in -1        
+        print ('Nikon DSC D5100 found')
         isCameraConnected = True
     else:
-        print "Nikon DSC D5100 NOT found"
+        print ('Nikon DSC D5100 NOT found')
         isCameraConnected = False
 
     return isCameraConnected
@@ -72,28 +81,44 @@ def takeOnePhoto():
         subprocess.check_output(['sudo','gphoto2','--capture-image-and-download'])
         
     except:
-        print "Oops something went wrong taking a single photo! " 
-        print sys.exc_info()
-        print sys.exc_type
+        print ("Oops something went wrong taking a single photo! ")
+        print (sys.exc_info())
+        print (sys.exc_type)
 
 def takeTimeLapseArgs(numOfFrames, intervalInSecs):
     output = ''
     try:
-        gphotocommand = ['sudo','gphoto2','--capture-image', '-F', str(numOfFrames), '-I', str(intervalInSecs)]
-        print gphotocommand
+        #there is a problem if there is already a file with the default filename in the save location
+        #The subprocess output shows that the process is trying to propmt the user to see if they want to overwrite
+        #the existing file, but right now there is not a way to communicate back to the process. Look into this later.
+        gphotocommand = ['sudo','gphoto2','--capture-image-and-download', '-F', str(numOfFrames), '-I', str(intervalInSecs)]
+        #print gphotocommand
         output = subprocess.check_output(gphotocommand)
-        print output
+        print (output)
         
     except:
-        print "Oops something went wrong with your timelapse command! " 
-        print sys.exc_info()
-        print sys.exc_type
+        print ('Oops something went wrong with your timelapse command! ') 
+        print (sys.exc_info())
+        print (sys.exc_type)
 
 def takeTimeLapse():
-    frames = raw_input("How many frames do you want for your timelapse? Type an integer and press enter ")
-    interval = raw_input("How many seconds between shots for your timelapse? Type an integer and press enter" )
+    frames = input("How many frames do you want for your timelapse? Type an integer and press enter ")
+    interval = input("How many seconds between shots for your timelapse? Type an integer and press enter" )
     #later, add validation to make sure the inputs are integers
     takeTimeLapseArgs(int(frames), int(interval))
+
+
+def checkMotionSensor():
+    global pir_pin
+    #getting "no access to /dev/mem, try running as root!" even when I open IDLE under sudo.
+    #to resolve later. (I updated GPIO to the latest, and moved from Python 2.7 to 3.2)
+
+    #RuntimeError: You must setup() the GPIO channel first <-- this is the next error to address. Tomorrow. 
+
+    if io.input(pir_pin): 
+        print("Don't Blink!")
+        takeOnePhoto()
+    
     
     
 
