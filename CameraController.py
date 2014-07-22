@@ -34,8 +34,10 @@ check and reset the process from within this script.
 import subprocess, sys, time
 import RPi.GPIO as io
 io.setmode(io.BCM)
+io.setwarnings(False)
 
 pir_pin=18
+io.setup(pir_pin, io.IN)
 
 def main():    
     keepGoing = True
@@ -69,16 +71,17 @@ def checkCamera():
         isCameraConnected = True
     else:
         print ('Nikon DSC D5100 NOT found')
-        isCameraConnected = False
+        isCameraConnected = False   
 
-    return isCameraConnected
-
+    #return isCameraConnected
+    return True #disabling the cameracheck to test the rest of the script
 
 def takeOnePhoto():
     
     try:
         #take one picture and download it to the folder containing the script
-        subprocess.check_output(['sudo','gphoto2','--capture-image-and-download'])
+        #Need to add code to specify the name of the photo to avoid file name conflicts
+        subprocess.check_output(['sudo','gphoto2','--capture-image-and-download', '--force-overwrite'])
         
     except:
         print ("Oops something went wrong taking a single photo! ")
@@ -91,15 +94,15 @@ def takeTimeLapseArgs(numOfFrames, intervalInSecs):
         #there is a problem if there is already a file with the default filename in the save location
         #The subprocess output shows that the process is trying to propmt the user to see if they want to overwrite
         #the existing file, but right now there is not a way to communicate back to the process. Look into this later.
-        gphotocommand = ['sudo','gphoto2','--capture-image-and-download', '-F', str(numOfFrames), '-I', str(intervalInSecs)]
+        #Need to add code to specify the name of the photo to avoid file name conflicts
+        gphotocommand = ['sudo','gphoto2','--capture-image', '-F', str(numOfFrames), '-I', str(intervalInSecs)]
         #print gphotocommand
         output = subprocess.check_output(gphotocommand)
         print (output)
         
     except:
         print ('Oops something went wrong with your timelapse command! ') 
-        print (sys.exc_info())
-        print (sys.exc_type)
+        
 
 def takeTimeLapse():
     frames = input("How many frames do you want for your timelapse? Type an integer and press enter ")
@@ -113,13 +116,15 @@ def checkMotionSensor():
     #getting "no access to /dev/mem, try running as root!" even when I open IDLE under sudo.
     #to resolve later. (I updated GPIO to the latest, and moved from Python 2.7 to 3.2)
 
-    #RuntimeError: You must setup() the GPIO channel first <-- this is the next error to address. Tomorrow. 
-
-    if io.input(pir_pin): 
-        print("Don't Blink!")
-        takeOnePhoto()
-    
-    
+    #RuntimeError: You must setup() the GPIO channel first <-- this is the next error to address. Tomorrow.
+    #I was missing this line of code: io.setup(pir_pin, io.IN)
+    while True:
+        if io.input(pir_pin): 
+            print("Don't Blink!")
+            #takeOnePhoto() #comment this line to test without the camera
+            time.sleep(1)
+        
+    io.cleanup()
     
 
 if __name__ == '__main__':
