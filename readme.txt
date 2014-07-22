@@ -4,15 +4,15 @@ What I want my Camera script to do:
 
 2. Take a timelapse photo series. --done
 
-3. Trigger the camera to take a picture using the Raspberry Pi motion sensor.
+3. Trigger the camera to take a picture using the Raspberry Pi motion sensor. -done
 
-4. Use error handling for any cases where the camera does not take a store the image for any reason. --partially done
+4. Use error handling for any cases where the camera does not take a store the image for any reason. --partially done - error messages are not very instructive
 
 5. Have built-in tests to verify each of these functions. (According to TDD the code writing should start with the tests.)
 
 6. New idea: Upload photos to Dropbox as they are taken. I have installed the dropbox package for Python, and next need to read the tutorial and documentation to learn how to use it. 
  
-7. Fun ideas for future enhancement:
+7. Fun ideas for future enhancements:
 	Get a Raspberry Pi GPS unit and geotag the pictures.
 	Connect a battery pack to make everything portable.
 	Make a carry-able case for the entire unit.
